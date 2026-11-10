@@ -1,0 +1,36 @@
+name: Trigger Bridge Status Scrape
+
+on:
+  schedule:
+    # 07:00 and 17:00 Israel Standard Time (UTC+2) -> 05:00 and 15:00 UTC
+    - cron: '0 5,15 * * *'
+    # 07:00 and 17:00 Israel Daylight Time (UTC+3) -> 04:00 and 14:00 UTC
+    - cron: '0 4,14 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+    inputs:
+      target_url:
+        description: 'Optional custom URL to ping'
+        required: false
+        type: string
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Scraper
+        run: |
+          # Priority: Manual input -> Secret/Variable -> Default placeholder
+          TARGET_URL="${{ inputs.target_url || secrets.SITE_URL || vars.SITE_URL }}"
+          
+          if [ -z "$TARGET_URL" ]; then
+            echo "::warning ::SITE_URL is not configured yet. Please add SITE_URL to your repository Secrets or Variables."
+            exit 0
+          fi
+
+          # Ensure no trailing slash
+          TARGET_URL="${TARGET_URL%/}"
+          ENDPOINT="${TARGET_URL}/api/cron/scrape"
+
+          echo "Pinging ${ENDPOINT}..."
+          RESPONSE=$(curl -s -X POST "$ENDPOINT" -H "Content-Type: application/json")
+          echo "Response: $RESPONSE"
