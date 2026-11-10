@@ -1,0 +1,27 @@
+{
+  "id": "sheva_tahanot",
+  "nameHe": "שבע טחנות",
+  "nameEn": "Sheva Tahanot",
+  "status": "OPEN",
+  "rawText": "שבע טחנות פתוח",
+  "sourceDate": "עודכן בתאריך 10/11/2026",
+  "lastCheckedAt": "2026-11-10T20:49:44.544Z",
+  "nextScheduledCheckAt": "2026-11-11T05:00:00.000Z",
+  "history": [
+    {
+      "id": "1794343785335",
+      "timestamp": "2026-11-10T20:49:44.544Z",
+      "status": "OPEN",
+      "rawText": "שבע טחנות פתוח",
+      "sourceDate": "עודכן בתאריך 10/11/2026"
+    },
+    {
+      "id": "1794343497424",
+      "timestamp": "2026-11-10T20:44:56.741Z",
+      "status": "OPEN",
+      "rawText": "שבע טחנות פתוח",
+      "sourceDate": "עודכן בתאריך 10/11/2026"
+    }
+  ],
+  "error": null
+}

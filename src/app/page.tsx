@@ -1,69 +1,81 @@
-import Image from "next/image";
+import { getStoredStatus } from '@/lib/storage';
+import { BridgeHeroCard } from '@/components/BridgeHeroCard';
+import { TimeDetailsCard } from '@/components/TimeDetailsCard';
+import { StatusHistoryTable } from '@/components/StatusHistoryTable';
+import { ManualRefreshButton } from '@/components/ManualRefreshButton';
+import { ExternalLink, Waves } from 'lucide-react';
 
-export default function Home() {
+export default async function HomePage() {
+  const data = await getStoredStatus();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto flex flex-col gap-8">
+      {/* Top Navigation / Header */}
+      <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
+            <Waves className="w-7 h-7" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              מצב גשר שבע טחנות
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400">
+              פארק הירקון — גני יהושע | ניטור מעבר הולכי רגל ורוכבי אופניים
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <ManualRefreshButton />
+          <a
+            href="https://park.co.il/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm text-slate-400 hover:text-slate-200 bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors"
+          >
+            <span>אתר הפארק הרשמי</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </header>
+
+      {/* Main Hero Status Banner */}
+      <section>
+        <BridgeHeroCard status={data.status} rawText={data.rawText} />
+      </section>
+
+      {/* Timestamp & Schedule Details */}
+      <section>
+        <TimeDetailsCard
+          lastCheckedAt={data.lastCheckedAt}
+          sourceDate={data.sourceDate}
+          nextScheduledCheckAt={data.nextScheduledCheckAt}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+      </section>
+
+      {/* Automated Schedule Explanatory Card */}
+      <section className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/70 text-slate-300 text-sm leading-relaxed flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <p>
+            <strong>לוח זמני הבדיקה:</strong> המערכת דוגמת באופן אוטומטי את אתר פארק הירקון פעמיים בכל יום:
+            בשעה <strong>07:00</strong> בבוקר ובשעה <strong>17:00</strong> בערב (לפי שעון ישראל).
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Historical Audit Log */}
+      <section>
+        <StatusHistoryTable history={data.history} />
+      </section>
+
+      {/* Footer */}
+      <footer className="mt-auto pt-8 border-t border-slate-800/60 text-center text-xs text-slate-500">
+        <p>
+          המידע נדגם מתוך אתר גני יהושע הרשמי (park.co.il) לשם נוחות רוכבי האופניים והמטיילים.
+        </p>
+      </footer>
+    </main>
   );
 }

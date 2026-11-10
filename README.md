@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# לוח סטטוס גשר שבע טחנות (פארק הירקון)
 
-## Getting Started
+אתר ודשבורד המציג האם גשר **שבע טחנות** בפארק הירקון פתוח או סגור למעבר הולכי רגל ורוכבי אופניים.
 
-First, run the development server:
+המערכת דוגמת באופן אוטומטי את האתר הרשמי של גני יהושע (`https://park.co.il/`) פעמיים ביום:
+* **07:00** בבוקר (שעון ישראל)
+* **17:00** בערב (שעון ישראל)
 
+---
+
+## תכונות המערכת
+- 🟢 **מחוון סטטוס בולט**: תצוגה מיידית וברורה (פתוח / סגור / בבדיקה).
+- 🕒 **פירוט זמנים**: זמן הבדיקה האחרון במערכת, תאריך העדכון הרשמי של הפארק, ושעון ספירה לאחור לבדיקה הבאה.
+- 🔄 **בדיקה ידנית בלחיצת כפתור**: אפשרות לדגום את האתר בלייב בכל רגע.
+- 📋 **יומן היסטוריה**: תיעוד השינויים והבדיקות הקודמות.
+- ⚡ **מהיר וחסכוני**: רץ על Next.js 15/16 + Tailwind CSS, מותאם לפריסה חינמית ב-Vercel.
+
+---
+
+## הרצה מקומית
+
+1. היכנס לתיקייה:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd Documents/bridge-status
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. הפעל את שרת הפיתוח:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. פתח את הדפדפן בכתובת:
+👉 **http://localhost:3000**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## פריסה לענן (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. העלה את התיקייה לחשבון ה-GitHub שלך.
+2. חבר את הפרויקט ל-Vercel (ייבוא בלחיצה אחת).
+3. קובץ ה-`vercel.json` הכלול בפרויקט יפעיל אוטומטית את בדיקות ה-Cron בשעות 07:00 ו-17:00.
