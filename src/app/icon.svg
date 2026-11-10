@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Rounded background badge -->
+  <rect width="64" height="64" rx="16" fill="#0f172a"/>
+  <rect width="64" height="64" rx="16" stroke="#10b981" stroke-width="2" opacity="0.4"/>
+  
+  <!-- Bridge Suspension Cables -->
+  <path d="M10 32 Q 22 18 32 30 Q 42 18 54 32" stroke="#34d399" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  
+  <!-- Vertical Support Suspender Cables -->
+  <line x1="22" y1="23" x2="22" y2="34" stroke="#34d399" stroke-width="1.5" opacity="0.7"/>
+  <line x1="27" y1="27" x2="27" y2="34" stroke="#34d399" stroke-width="1.5" opacity="0.7"/>
+  <line x1="37" y1="27" x2="37" y2="34" stroke="#34d399" stroke-width="1.5" opacity="0.7"/>
+  <line x1="42" y1="23" x2="42" y2="34" stroke="#34d399" stroke-width="1.5" opacity="0.7"/>
+
+  <!-- Bridge Towers / Pillars -->
+  <rect x="18" y="14" width="4" height="26" rx="1.5" fill="#f8fafc"/>
+  <rect x="42" y="14" width="4" height="26" rx="1.5" fill="#f8fafc"/>
+  <!-- Tower Crossbars -->
+  <line x1="18" y1="20" x2="22" y2="20" stroke="#0f172a" stroke-width="1.5"/>
+  <line x1="42" y1="20" x2="46" y2="20" stroke="#0f172a" stroke-width="1.5"/>
+
+  <!-- Bridge Deck / Roadway -->
+  <rect x="8" y="34" width="48" height="4" rx="1.5" fill="#f8fafc"/>
+  <rect x="8" y="37" width="48" height="1.5" fill="#10b981"/>
+
+  <!-- River Water Waves Below -->
+  <path d="M12 46 C 18 43, 22 49, 28 46 C 34 43, 38 49, 44 46 C 48 44, 50 46, 52 46" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+  <path d="M16 52 C 22 49, 26 55, 32 52 C 38 49, 42 55, 48 52" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" opacity="0.6" fill="none"/>
+</svg>
