@@ -17,9 +17,9 @@ export const metadata: Metadata = {
   description: 'לוח מחוונים מעודכן למצב מעבר גשר שבע טחנות בפארק הירקון (פתוח / סגור)',
   icons: {
     icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico' },
+      { url: '/icon.svg?v=2', type: 'image/svg+xml' },
     ],
+    apple: '/icon.svg?v=2',
   },
 };
 

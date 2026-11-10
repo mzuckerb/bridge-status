@@ -4,6 +4,14 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  async rewrites() {
+    return [
+      {
+        source: '/favicon.ico',
+        destination: '/icon.svg',
+      },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {
