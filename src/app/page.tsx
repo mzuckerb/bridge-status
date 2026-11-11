@@ -26,6 +26,7 @@ export default async function HomePage() {
         <section>
           <TimeDetailsCard
             lastCheckedAt={data.lastCheckedAt}
+            lastScheduledCheckAt={data.lastScheduledCheckAt}
             sourceDate={data.sourceDate}
             nextScheduledCheckAt={data.nextScheduledCheckAt}
           />

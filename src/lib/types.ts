@@ -25,6 +25,7 @@ export interface BridgeStatusData {
   rawText: string;
   sourceDate: string;
   lastCheckedAt: string;
+  lastScheduledCheckAt: string;
   nextScheduledCheckAt: string;
   history: StatusHistoryItem[];
   error?: string | null;

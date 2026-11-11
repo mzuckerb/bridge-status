@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import { BridgeStatusData, ScrapeResult, StatusHistoryItem } from './types';
-import { getNextScheduledCheck } from './schedule';
+import { getLastScheduledCheck, getNextScheduledCheck } from './schedule';
 import { scrapeBridgeStatus } from './scraper';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'status.json');
 
-// In-memory cache for serverless environments
+// Memory cache for serverless environments
 let memoryData: BridgeStatusData | null = null;
 
 function readDiskData(): BridgeStatusData | null {
@@ -35,21 +35,30 @@ function writeDiskData(data: BridgeStatusData): void {
 
 /**
  * Gets the current bridge status.
- * Performs a live scrape on demand with fallback to cached/stored data.
+ * Reflects the 07:00 / 17:00 schedule and scrapes without spamming duplicates.
  */
 export async function getStoredStatus(forceFresh: boolean = false): Promise<BridgeStatusData> {
   const diskData = readDiskData();
   const current = memoryData || diskData;
 
-  // If we already have fresh data from less than 60 seconds ago, reuse it
+  const now = new Date();
+  const lastScheduled = getLastScheduledCheck(now);
+  const nextScheduled = getNextScheduledCheck(now);
+
+  // If we have data and it's not a forced refresh, reuse cache for 10 minutes to avoid re-scraping on every page click
   if (current && !forceFresh) {
     const ageSeconds = (Date.now() - new Date(current.lastCheckedAt).getTime()) / 1000;
-    if (ageSeconds < 60) {
-      return current;
+    if (ageSeconds < 600) {
+      // Just keep schedule timestamps accurate
+      return {
+        ...current,
+        lastScheduledCheckAt: lastScheduled.toISOString(),
+        nextScheduledCheckAt: nextScheduled.toISOString(),
+      };
     }
   }
 
-  // Perform a live scrape to always have the latest real data
+  // Perform scrape
   try {
     const liveResult = await scrapeBridgeStatus();
     if (liveResult.success) {
@@ -59,44 +68,51 @@ export async function getStoredStatus(forceFresh: boolean = false): Promise<Brid
     console.error('Error in live scrape:', err);
   }
 
-  return current || {
-    id: 'sheva_tahanot',
-    nameHe: 'שבע טחנות',
-    nameEn: 'Sheva Tahanot',
-    status: 'OPEN',
-    rawText: 'שבע טחנות פתוח',
-    sourceDate: '',
-    lastCheckedAt: new Date().toISOString(),
-    nextScheduledCheckAt: getNextScheduledCheck().toISOString(),
-    history: [],
-    error: null,
-  };
+  return (
+    current || {
+      id: 'sheva_tahanot',
+      nameHe: 'שבע טחנות',
+      nameEn: 'Sheva Tahanot',
+      status: 'OPEN',
+      rawText: 'שבע טחנות פתוח',
+      sourceDate: '',
+      lastCheckedAt: now.toISOString(),
+      lastScheduledCheckAt: lastScheduled.toISOString(),
+      nextScheduledCheckAt: nextScheduled.toISOString(),
+      history: [],
+      error: null,
+    }
+  );
 }
 
 export async function updateBridgeStatus(forcedResult?: ScrapeResult): Promise<BridgeStatusData> {
   const result = forcedResult ?? (await scrapeBridgeStatus());
   const current = memoryData || readDiskData();
 
-  const nextCheck = getNextScheduledCheck(new Date());
-
-  const newHistoryItem: StatusHistoryItem = {
-    id: `${Date.now()}`,
-    timestamp: result.checkedAt,
-    status: result.status,
-    rawText: result.rawText,
-    sourceDate: result.sourceDate,
-  };
+  const now = new Date();
+  const lastScheduled = getLastScheduledCheck(now);
+  const nextScheduled = getNextScheduledCheck(now);
 
   const existingHistory = current?.history || [];
-  // Avoid duplicate adjacent history items if same status and date
+
+  // Avoid creating redundant history items on every page visit
+  // Only add to history if status changed, source date changed, or history is empty
   const isDuplicate =
     existingHistory.length > 0 &&
     existingHistory[0].status === result.status &&
     existingHistory[0].sourceDate === result.sourceDate;
 
-  const updatedHistory = isDuplicate
-    ? existingHistory
-    : [newHistoryItem, ...existingHistory].slice(0, 30);
+  let updatedHistory = existingHistory;
+  if (!isDuplicate) {
+    const newHistoryItem: StatusHistoryItem = {
+      id: `${Date.now()}`,
+      timestamp: lastScheduled.toISOString(), // Anchor history timestamp to the scheduled window
+      status: result.status,
+      rawText: result.rawText,
+      sourceDate: result.sourceDate,
+    };
+    updatedHistory = [newHistoryItem, ...existingHistory].slice(0, 30);
+  }
 
   const updatedData: BridgeStatusData = {
     id: 'sheva_tahanot',
@@ -105,8 +121,9 @@ export async function updateBridgeStatus(forcedResult?: ScrapeResult): Promise<B
     status: result.status !== 'UNKNOWN' ? result.status : (current?.status ?? 'UNKNOWN'),
     rawText: result.rawText,
     sourceDate: result.sourceDate,
-    lastCheckedAt: result.checkedAt,
-    nextScheduledCheckAt: nextCheck.toISOString(),
+    lastCheckedAt: now.toISOString(),
+    lastScheduledCheckAt: lastScheduled.toISOString(),
+    nextScheduledCheckAt: nextScheduled.toISOString(),
     history: updatedHistory,
     error: result.error,
   };
