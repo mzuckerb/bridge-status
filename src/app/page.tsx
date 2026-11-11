@@ -5,6 +5,8 @@ import { StatusHistoryTable } from '@/components/StatusHistoryTable';
 import { ManualRefreshButton } from '@/components/ManualRefreshButton';
 import { ExternalLink, Waves } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const data = await getStoredStatus();
 

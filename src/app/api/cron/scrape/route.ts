@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateBridgeStatus } from '@/lib/storage';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 async function handleScrape(req: NextRequest) {
   // If CRON_SECRET is configured, enforce bearer authentication
   const cronSecret = process.env.CRON_SECRET;
