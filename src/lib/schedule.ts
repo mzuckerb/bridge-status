@@ -46,19 +46,16 @@ export function getJerusalemParts(date: Date = new Date()): JerusalemParts {
  * Creates a UTC Date representing a specific hour on a specific day in Asia/Jerusalem
  */
 export function makeJerusalemDate(year: number, month: number, day: number, hour: number, minute: number = 0): Date {
-  // Construct an approximate UTC noon date on that day
   const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
   
-  // Find the exact Jerusalem offset at noon on that calendar day (handles daylight saving accurately)
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: TIMEZONE,
     hour: 'numeric',
     hour12: false,
   });
   const jerusalemHourAt12Utc = parseInt(formatter.format(d), 10);
-  const offsetHours = jerusalemHourAt12Utc - 12; // +2 in winter (IST), +3 in summer (IDT)
+  const offsetHours = jerusalemHourAt12Utc - 12;
 
-  // Target hour in Jerusalem corresponds to (hour - offsetHours) in UTC
   return new Date(Date.UTC(year, month, day, hour - offsetHours, minute, 0));
 }
 
@@ -72,15 +69,12 @@ export function getLastScheduledCheck(now: Date = new Date()): Date {
   let lastDayOffset: number;
 
   if (j.hour < 7) {
-    // Before 07:00: last check was yesterday at 17:00
     lastHour = 17;
     lastDayOffset = -1;
   } else if (j.hour < 17) {
-    // Between 07:00 and 17:00: last check was today at 07:00
     lastHour = 7;
     lastDayOffset = 0;
   } else {
-    // Past 17:00: last check was today at 17:00
     lastHour = 17;
     lastDayOffset = 0;
   }
@@ -98,15 +92,12 @@ export function getNextScheduledCheck(now: Date = new Date()): Date {
   let nextDayOffset: number;
 
   if (j.hour < 7) {
-    // Before 07:00: next check is today at 07:00
     nextHour = 7;
     nextDayOffset = 0;
   } else if (j.hour < 17) {
-    // Between 07:00 and 17:00: next check is today at 17:00
     nextHour = 17;
     nextDayOffset = 0;
   } else {
-    // Past 17:00: next check is tomorrow at 07:00
     nextHour = 7;
     nextDayOffset = 1;
   }
@@ -116,7 +107,6 @@ export function getNextScheduledCheck(now: Date = new Date()): Date {
 
 /**
  * Formats a Date into a human-friendly string relative to today in Israel
- * e.g. "היום ב-07:00", "היום ב-17:00", "מחר ב-07:00", "אתמול ב-17:00"
  */
 export function formatFriendlySchedule(targetDate: Date, now: Date = new Date()): {
   hebrew: string;
@@ -127,7 +117,6 @@ export function formatFriendlySchedule(targetDate: Date, now: Date = new Date())
 
   const hourStr = String(targetParts.hour).padStart(2, '0') + ':00';
 
-  // Compare calendar days in Jerusalem
   const nowDayEpoch = Date.UTC(nowParts.year, nowParts.month, nowParts.day);
   const targetDayEpoch = Date.UTC(targetParts.year, targetParts.month, targetParts.day);
   const diffDays = Math.round((targetDayEpoch - nowDayEpoch) / (1000 * 60 * 60 * 24));
@@ -162,10 +151,11 @@ export function formatFriendlySchedule(targetDate: Date, now: Date = new Date())
 export function formatIsraelDateTime(isoString: string): {
   hebrew: string;
   english: string;
+  timeOnly: string;
 } {
   const date = new Date(isoString);
   if (isNaN(date.getTime())) {
-    return { hebrew: 'לא ידוע', english: 'Unknown' };
+    return { hebrew: 'לא ידוע', english: 'Unknown', timeOnly: '--:--' };
   }
 
   const heFormatter = new Intl.DateTimeFormat('he-IL', {
@@ -186,8 +176,15 @@ export function formatIsraelDateTime(isoString: string): {
     minute: '2-digit',
   });
 
+  const timeFormatter = new Intl.DateTimeFormat('he-IL', {
+    timeZone: TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
   return {
     hebrew: heFormatter.format(date),
     english: enFormatter.format(date),
+    timeOnly: timeFormatter.format(date),
   };
 }

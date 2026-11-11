@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, RefreshCw, Radio } from 'lucide-react';
-import { formatFriendlySchedule } from '@/lib/schedule';
+import { formatFriendlySchedule, formatIsraelDateTime } from '@/lib/schedule';
 
 interface TimeDetailsCardProps {
   lastCheckedAt: string;
@@ -15,12 +15,12 @@ export function TimeDetailsCard({
   sourceDate,
   nextScheduledCheckAt,
 }: TimeDetailsCardProps) {
-  // Use the scheduled check anchor if available, otherwise fallback
   const lastCheckDate = lastScheduledCheckAt ? new Date(lastScheduledCheckAt) : new Date(lastCheckedAt);
   const nextCheckDate = new Date(nextScheduledCheckAt);
 
   const formattedLast = formatFriendlySchedule(lastCheckDate);
   const formattedNext = formatFriendlySchedule(nextCheckDate);
+  const liveVerifiedTime = lastCheckedAt ? formatIsraelDateTime(lastCheckedAt).timeOnly : null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -44,7 +44,7 @@ export function TimeDetailsCard({
         </div>
       </div>
 
-      {/* 2. Last scheduled check */}
+      {/* 2. Last scheduled check + live verification indicator */}
       <div className="relative overflow-hidden rounded-2xl glass-panel p-5 transition-all duration-300 hover:shadow-md hover:border-purple-500/30 group">
         <div className="flex items-start gap-4">
           <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
@@ -57,8 +57,9 @@ export function TimeDetailsCard({
             <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
               {formattedLast.hebrew}
             </p>
-            <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-              שעון ישראל (בדיקות ב-07:00 ו-17:00)
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center gap-1.5 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {liveVerifiedTime ? `אימות חי אחרון: ${liveVerifiedTime}` : 'שעון ישראל (07:00 ו-17:00)'}
             </span>
           </div>
         </div>
