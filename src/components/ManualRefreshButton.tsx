@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { RefreshCw, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { StatusHistoryItem } from '@/lib/types';
 
 export function ManualRefreshButton() {
   const [loading, setLoading] = useState(false);
@@ -18,15 +19,38 @@ export function ManualRefreshButton() {
       const res = await fetch('/api/cron/scrape', { method: 'POST' });
       if (res.ok) {
         const json = await res.json();
-        const checkIso = json.data?.lastCheckedAt || new Date().toISOString();
-        
-        // Record user check time so TimeDetailsCard immediately displays it
-        try {
-          localStorage.setItem('last_user_check', checkIso);
-          window.dispatchEvent(new CustomEvent('bridge-status-refreshed', { detail: { timestamp: checkIso } }));
-        } catch {}
+        const nowIso = new Date().toISOString();
+        const status = json.data?.status || 'OPEN';
+        const rawText = json.data?.rawText ? `${json.data.rawText} (אימות ידני)` : 'שבע טחנות פתוח (אימות ידני)';
+        const sourceDate = json.data?.sourceDate || '';
 
-        const statusHe = json.data?.status === 'OPEN' ? 'פתוח' : json.data?.status === 'CLOSED' ? 'סגור' : 'מאומת';
+        const newItem: StatusHistoryItem = {
+          id: `manual_${Date.now()}`,
+          timestamp: nowIso,
+          status,
+          rawText,
+          sourceDate,
+        };
+
+        // Save manual check to localStorage so it updates TimeDetailsCard and StatusHistoryTable
+        try {
+          localStorage.setItem('last_user_check', nowIso);
+
+          const existingStored = localStorage.getItem('bridge_manual_history');
+          const list: StatusHistoryItem[] = existingStored ? JSON.parse(existingStored) : [];
+          const updatedList = [newItem, ...list].slice(0, 30);
+          localStorage.setItem('bridge_manual_history', JSON.stringify(updatedList));
+
+          window.dispatchEvent(
+            new CustomEvent('bridge-status-refreshed', {
+              detail: { item: newItem, timestamp: nowIso },
+            })
+          );
+        } catch (err) {
+          console.error('Error saving manual history to localStorage:', err);
+        }
+
+        const statusHe = status === 'OPEN' ? 'פתוח' : status === 'CLOSED' ? 'סגור' : 'מאומת';
         setSuccessMsg(`אומת: ${statusHe}!`);
         router.refresh();
         setTimeout(() => setSuccessMsg(null), 4000);

@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { StatusHistoryItem } from '@/lib/types';
 import { formatIsraelDateTime } from '@/lib/schedule';
 import { CheckCircle2, XCircle, AlertCircle, History } from 'lucide-react';
@@ -8,7 +10,55 @@ interface StatusHistoryTableProps {
 }
 
 export function StatusHistoryTable({ history }: StatusHistoryTableProps) {
-  if (!history || history.length === 0) {
+  const [items, setItems] = useState<StatusHistoryItem[]>(history || []);
+
+  useEffect(() => {
+    // Merge server history with any locally saved manual user checks
+    const loadMergedHistory = () => {
+      try {
+        const storedManual = localStorage.getItem('bridge_manual_history');
+        const manualItems: StatusHistoryItem[] = storedManual ? JSON.parse(storedManual) : [];
+
+        // Combine and deduplicate by ID or identical timestamp
+        const combined = [...manualItems, ...(history || [])];
+        const seen = new Set<string>();
+        const unique = combined.filter((item) => {
+          const key = `${item.id}_${item.timestamp}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        // Sort descending by timestamp
+        unique.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setItems(unique.slice(0, 30));
+      } catch (err) {
+        console.error('Error loading manual history:', err);
+        setItems(history || []);
+      }
+    };
+
+    loadMergedHistory();
+
+    // Listen for real-time manual check events
+    const handleNewCheck = (e: Event) => {
+      const customEvent = e as CustomEvent<{ item?: StatusHistoryItem }>;
+      if (customEvent.detail?.item) {
+        const newItem = customEvent.detail.item;
+        setItems((prev) => {
+          const filtered = prev.filter((p) => p.id !== newItem.id);
+          return [newItem, ...filtered].slice(0, 30);
+        });
+      }
+    };
+
+    window.addEventListener('bridge-status-refreshed', handleNewCheck);
+    return () => {
+      window.removeEventListener('bridge-status-refreshed', handleNewCheck);
+    };
+  }, [history]);
+
+  if (!items || items.length === 0) {
     return (
       <div className="p-8 rounded-2xl glass-panel text-center text-slate-500 dark:text-slate-400">
         טרם נרשמו בדיקות קודמות בהיסטוריה.
@@ -28,13 +78,13 @@ export function StatusHistoryTable({ history }: StatusHistoryTableProps) {
               היסטוריית בדיקות אחרונות
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              תיעוד רציף של מצב הגשר שנרשם במערכת
+              תיעוד רציף של בדיקות אוטומטיות ואימותים ידניים
             </p>
           </div>
         </div>
 
         <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full bg-slate-200/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 border border-slate-300/40 dark:border-slate-700/40">
-          {history.length} רשומות
+          {items.length} רשומות
         </span>
       </div>
 
@@ -49,7 +99,7 @@ export function StatusHistoryTable({ history }: StatusHistoryTableProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40">
-            {history.map((item) => {
+            {items.map((item) => {
               const formatted = formatIsraelDateTime(item.timestamp);
               const isOpen = item.status === 'OPEN';
               const isClosed = item.status === 'CLOSED';
