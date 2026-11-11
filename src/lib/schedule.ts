@@ -34,7 +34,7 @@ export function getJerusalemParts(date: Date = new Date()): JerusalemParts {
 
   return {
     year: p.year ?? date.getFullYear(),
-    month: (p.month ?? (date.getMonth() + 1)) - 1, // 0-indexed
+    month: (p.month ?? (date.getMonth() + 1)) - 1,
     day: p.day ?? date.getDate(),
     hour: p.hour === 24 ? 0 : (p.hour ?? date.getHours()),
     minute: p.minute ?? date.getMinutes(),
@@ -43,7 +43,7 @@ export function getJerusalemParts(date: Date = new Date()): JerusalemParts {
 }
 
 /**
- * Creates a UTC Date representing a specific hour on a specific day in Asia/Jerusalem
+ * Creates a UTC Date representing a specific hour and minute in Asia/Jerusalem
  */
 export function makeJerusalemDate(year: number, month: number, day: number, hour: number, minute: number = 0): Date {
   const d = new Date(Date.UTC(year, month, day, 12, 0, 0));
@@ -79,7 +79,7 @@ export function getLastScheduledCheck(now: Date = new Date()): Date {
     lastDayOffset = 0;
   }
 
-  return makeJerusalemDate(j.year, j.month, j.day + lastDayOffset, lastHour);
+  return makeJerusalemDate(j.year, j.month, j.day + lastDayOffset, lastHour, 0);
 }
 
 /**
@@ -102,20 +102,22 @@ export function getNextScheduledCheck(now: Date = new Date()): Date {
     nextDayOffset = 1;
   }
 
-  return makeJerusalemDate(j.year, j.month, j.day + nextDayOffset, nextHour);
+  return makeJerusalemDate(j.year, j.month, j.day + nextDayOffset, nextHour, 0);
 }
 
 /**
  * Formats a Date into a human-friendly string relative to today in Israel
+ * e.g. "היום ב-17:00", "היום ב-19:32", "מחר ב-07:00", "אתמול ב-17:00"
  */
-export function formatFriendlySchedule(targetDate: Date, now: Date = new Date()): {
+export function formatFriendlyDateTime(targetDate: Date, now: Date = new Date()): {
   hebrew: string;
   english: string;
 } {
   const nowParts = getJerusalemParts(now);
   const targetParts = getJerusalemParts(targetDate);
 
-  const hourStr = String(targetParts.hour).padStart(2, '0') + ':00';
+  const hourStr =
+    String(targetParts.hour).padStart(2, '0') + ':' + String(targetParts.minute).padStart(2, '0');
 
   const nowDayEpoch = Date.UTC(nowParts.year, nowParts.month, nowParts.day);
   const targetDayEpoch = Date.UTC(targetParts.year, targetParts.month, targetParts.day);
